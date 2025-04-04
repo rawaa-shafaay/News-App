@@ -59,7 +59,10 @@ class _HomePageState extends State<HomePage> {
   void _showSnackBar(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+      SnackBar(
+        content: Text(message, textAlign: TextAlign.center),
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
@@ -109,7 +112,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildViewSelector(),
             if (_currentView == NewsType.allNews) ...[
-              const SortByWidget(),
+              Align(alignment: Alignment.topRight, child: const SortByWidget()),
               const SizedBox(height: 8),
             ],
             Expanded(
@@ -127,26 +130,31 @@ class _HomePageState extends State<HomePage> {
   Widget _buildViewSelector() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: SegmentedButton<NewsType>(
-        segments: const [
-          ButtonSegment(
-            value: NewsType.allNews,
-            label: Text('All News'),
-            icon: Icon(Icons.list),
-          ),
-          ButtonSegment(
-            value: NewsType.topTrending,
-            label: Text('top Trending'),
-            icon: Icon(Icons.trending_up),
-          ),
-        ],
-        selected: {_currentView},
-        onSelectionChanged:
-            (newsSelection) =>
-                setState(() => _currentView = newsSelection.first),
+      child: SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<NewsType>(
+          segments: _newsTypeSegments,
+          selected: {_currentView},
+          onSelectionChanged:
+              (newsSelection) =>
+                  setState(() => _currentView = newsSelection.first),
+        ),
       ),
     );
   }
+
+  final List<ButtonSegment<NewsType>> _newsTypeSegments = [
+    const ButtonSegment(
+      value: NewsType.allNews,
+      label: Text('All News'),
+      icon: Icon(Icons.list),
+    ),
+    const ButtonSegment(
+      value: NewsType.topTrending,
+      label: Text('Top Trending'),
+      icon: Icon(Icons.trending_up),
+    ),
+  ];
 
   Widget _buildArticlesList(NewsProvider provider) {
     final shouldShowFooter =
@@ -162,16 +170,11 @@ class _HomePageState extends State<HomePage> {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final articles = provider.articles;
-          print(
-            '🧱 Building index $index / articles.length = ${articles.length}',
-          );
+
           if (index < articles.length) {
             final article = articles[index];
             return ArticleWidget(article: article, key: ValueKey(article.id));
           }
-          print('➡️ Reached extra slot (index = $index)');
-
-          // 🧠 This is now 100% safe and won't build an article
           if (provider.hasMore) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
