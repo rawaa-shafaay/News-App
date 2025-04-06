@@ -1,3 +1,6 @@
+import 'package:reading_time/reading_time.dart';
+import 'package:sample/services/global_methods.dart';
+
 class NewsModel {
   final String id;
   final String name;
@@ -7,7 +10,8 @@ class NewsModel {
   final String url;
   final String urlToImage;
   final String publishedAt;
-  final String readingTime;
+  final String content;
+  final String readingTimeText;
   final String dateToShow;
 
   NewsModel({
@@ -19,11 +23,16 @@ class NewsModel {
     required this.url,
     required this.urlToImage,
     required this.publishedAt,
-    required this.readingTime,
+    required this.content,
+    required this.readingTimeText,
     required this.dateToShow,
   });
 
   factory NewsModel.fromJson(Map<String, dynamic> json) {
+    String title = json['title'] ?? "";
+    String description = json['description'] ?? "";
+    String content = json[''] ?? "";
+    String dateToShow = GlobalMethods.formattedDateText(json['publishedAt']);
     return NewsModel(
       id: json['source']['id'] ?? "",
       name: json['source']['name'] ?? "",
@@ -33,8 +42,9 @@ class NewsModel {
       url: json['url'] ?? "",
       urlToImage: json['urlToImage'] ?? "",
       publishedAt: json['publishedAt'] ?? "",
-      readingTime: 'readingTime',
-      dateToShow: 'dateToShow',
+      content: json['content'] ?? "",
+      readingTimeText: readingTime(title + content + description).msg,
+      dateToShow: dateToShow,
     );
   }
 
@@ -47,7 +57,8 @@ class NewsModel {
       'url': url,
       'urlToImage': urlToImage,
       'publishedAt': publishedAt,
-      'readingTime': readingTime,
+      'content': content,
+      'readingTime': readingTimeText,
       'dateToShow': dateToShow,
     };
   }

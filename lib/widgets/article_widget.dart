@@ -48,15 +48,18 @@ class ArticleWidget extends StatelessWidget {
   Widget _builTextContent(BuildContext context) {
     return Expanded(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            article.description,
+            article.title,
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
+            textAlign: TextAlign.justify,
           ),
+          SizedBox(height: 10),
           Align(
             alignment: Alignment.topRight,
-            child: Text(article.readingTime),
+            child: Text(article.readingTimeText),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
