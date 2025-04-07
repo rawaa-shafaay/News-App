@@ -32,7 +32,7 @@ class NewsModel {
     String title = json['title'] ?? "";
     String description = json['description'] ?? "";
     String content = json[''] ?? "";
-    String dateToShow = GlobalMethods.formattedDateText(json['publishedAt']);
+    String dateToShow = GlobalMethods.formattedDate(json['publishedAt']);
     return NewsModel(
       id: json['source']['id'] ?? "",
       name: json['source']['name'] ?? "",

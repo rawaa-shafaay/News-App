@@ -9,6 +9,7 @@ import 'package:sample/states/error_state.dart';
 import 'package:sample/widgets/article_widget.dart';
 import 'package:sample/widgets/drawer_widget.dart';
 import 'package:sample/widgets/sort_by_widget.dart';
+import 'package:sample/widgets/theme_toggle_icon.dart';
 import 'package:sample/widgets/top_trending_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -90,6 +91,7 @@ class _HomePageState extends State<HomePage> {
           onPressed: () => _refreshData(),
           tooltip: 'refresh news',
         ),
+        ThemeToggleIcon(),
       ],
     );
   }
