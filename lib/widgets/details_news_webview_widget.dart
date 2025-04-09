@@ -12,7 +12,7 @@ class DetailsNewsWebviewWidget extends StatefulWidget {
 }
 
 class _DetailsNewsWebviewWidgetState extends State<DetailsNewsWebviewWidget> {
-  late final _controller;
+  late final WebViewController _controller;
 
   @override
   void initState() {

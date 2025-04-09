@@ -4,12 +4,16 @@ import 'package:http/http.dart' as http;
 import 'package:sample/response/news_api_response.dart';
 
 class NewsApiServices {
-  static Future<NewsApiResponse> fetchNewsFromApi({int? page}) async {
+  static Future<NewsApiResponse> fetchNewsFromApi({
+    int? page,
+    required String sortBy,
+  }) async {
     const int pageSize = 10;
 
     Uri uri = Uri.https(baseurl, 'v2/everything', {
       'q': 'bitcoin',
       'pageSize': pageSize.toString(),
+      'sortBy': sortBy,
       if (page != null) 'page': page.toString(),
     });
 

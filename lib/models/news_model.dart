@@ -37,12 +37,12 @@ class NewsModel {
       id: json['source']['id'] ?? "",
       name: json['source']['name'] ?? "",
       author: json['author'] ?? "",
-      title: json['title'] ?? "",
-      description: json['description'] ?? "",
+      title: title,
+      description: description,
       url: json['url'] ?? "",
       urlToImage: json['urlToImage'] ?? "",
       publishedAt: json['publishedAt'] ?? "",
-      content: json['content'] ?? "",
+      content: content,
       readingTimeText: readingTime(title + content + description).msg,
       dateToShow: dateToShow,
     );
@@ -63,7 +63,7 @@ class NewsModel {
     };
   }
 
-  static List<NewsModel> newSnapShot(List<dynamic> snapShot) {
+  static List<NewsModel> newsSnapShot(List<dynamic> snapShot) {
     return snapShot.where((item) => item != null).map((json) {
       return NewsModel.fromJson(json);
     }).toList();

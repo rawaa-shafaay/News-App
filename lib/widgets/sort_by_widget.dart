@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sample/enums/sort_by.dart';
+import 'package:sample/providers/news_provider.dart';
 
 class SortByWidget extends StatefulWidget {
   const SortByWidget({super.key});
@@ -9,7 +11,15 @@ class SortByWidget extends StatefulWidget {
 }
 
 class _SortByWidgetState extends State<SortByWidget> {
-  SortBy _selectedSortBy = SortBy.publishedAt;
+  late SortBy _selectedSortBy;
+  late NewsProvider _newsProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _newsProvider = context.read<NewsProvider>();
+    _selectedSortBy = _mapStringToSortBy(_newsProvider.sortBy);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +37,12 @@ class _SortByWidgetState extends State<SortByWidget> {
         value: _selectedSortBy,
         items: _dropDownMenuItems(),
         onChanged: (value) {
-          setState(() {
-            _selectedSortBy = value!;
-          });
+          if (value != null && value != _selectedSortBy) {
+            setState(() {
+              _selectedSortBy = value;
+            });
+          }
+          _newsProvider.setSortBy(value!.name);
         },
       ),
     );
@@ -39,5 +52,12 @@ class _SortByWidgetState extends State<SortByWidget> {
     return SortBy.values
         .map((item) => DropdownMenuItem(value: item, child: Text(item.name)))
         .toList();
+  }
+
+  SortBy _mapStringToSortBy(String value) {
+    return SortBy.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => SortBy.publishedAt, // default fallback
+    );
   }
 }

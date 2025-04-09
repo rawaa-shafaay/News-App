@@ -13,7 +13,7 @@ class NewsApiResponse {
 
   factory NewsApiResponse.fromJson(Map<String, dynamic> json, int pageSize) {
     return NewsApiResponse(
-      articles: NewsModel.newSnapShot(json['articles'] ?? []),
+      articles: NewsModel.newsSnapShot(json['articles'] ?? []),
       totalResults: json['totalResults'] ?? 0,
       pageSize: pageSize,
     );

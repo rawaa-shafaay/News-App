@@ -1,1 +1,1 @@
-enum SortBy { popularity, publishedAt }
+enum SortBy { popularity, publishedAt, relevancy }

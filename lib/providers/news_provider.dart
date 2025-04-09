@@ -8,12 +8,14 @@ class NewsProvider with ChangeNotifier {
   String? _errorMessage;
   bool _hasMore = true;
   int _currentPage = 1;
+  String _sortBy = '';
 
   List<NewsModel> get articles => _articlesList;
   bool get isLoading => _isLoading;
   String? get error => _errorMessage;
   bool get hasMore => _hasMore;
   int get currentPage => _currentPage;
+  String get sortBy => _sortBy;
 
   Future<void> loadArticles({bool refresh = false, int page = 1}) async {
     if (_isLoading) return;
@@ -25,7 +27,10 @@ class NewsProvider with ChangeNotifier {
     }
 
     try {
-      final response = await NewsApiServices.fetchNewsFromApi(page: page);
+      final response = await NewsApiServices.fetchNewsFromApi(
+        page: page,
+        sortBy: _sortBy,
+      );
       final newArticles = response.articles;
 
       _hasMore = newArticles.length == response.pageSize;
@@ -40,6 +45,14 @@ class NewsProvider with ChangeNotifier {
       _setError('Failed to load articles: ${e.toString()}');
     } finally {
       _setLoading(false);
+    }
+  }
+
+  void setSortBy(String newSortBy) {
+    if (newSortBy != _sortBy) {
+      _sortBy = newSortBy;
+      refreshArticles();
+      notifyListeners();
     }
   }
 

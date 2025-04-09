@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +26,16 @@ class _HomePageState extends State<HomePage> {
   final _swiperController = SwiperController();
   NewsType _currentView = NewsType.allNews;
   late final NewsProvider _newsProvider;
+  Timer? _loadMoreTimer;
+
+  @override
+  void dispose() {
+    _loadMoreTimer?.cancel();
+    _scrollController.removeListener(_setupScrollListener);
+    _scrollController.dispose();
+    _swiperController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -48,12 +60,37 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _setupScrollListener() {
+    _scrollController.addListener(() {
+      if (_shouldLoadMore()) {
+        _loadMoreTimer?.cancel();
+        _loadMoreTimer = Timer(const Duration(milliseconds: 500), () {
+          if (mounted && _shouldLoadMore()) {
+            _newsProvider.loadArticles(page: _newsProvider.currentPage + 1);
+          }
+        });
+      }
+    });
+  }
+
+  bool _shouldLoadMore() {
+    final position = _scrollController.position;
+    return position.pixels >= position.maxScrollExtent - 100 &&
+        !_newsProvider.isLoading &&
+        _newsProvider.hasMore;
+  }
+
   Future<void> _refreshData() async {
     try {
       await _newsProvider.refreshArticles();
-      _showSnackBar('News refreshed successfully');
+      if (mounted) {
+        _showSnackBar('News refreshed successfully');
+      }
     } catch (e) {
-      _showSnackBar('Refresh failed: ${e.toString()}');
+      if (mounted) {
+        _showSnackBar('Refresh failed: ${e.toString()}');
+        Future.delayed(const Duration(seconds: 3), _refreshData);
+      }
     }
   }
 
@@ -114,7 +151,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildViewSelector(),
             if (_currentView == NewsType.allNews) ...[
-              Align(alignment: Alignment.topRight, child: const SortByWidget()),
+              const SortByWidget(),
               const SizedBox(height: 8),
             ],
             Expanded(
@@ -159,41 +196,44 @@ class _HomePageState extends State<HomePage> {
   ];
 
   Widget _buildArticlesList(NewsProvider provider) {
-    final shouldShowFooter =
-        provider.articles.isNotEmpty && (provider.hasMore || !provider.hasMore);
-    final itemCount = provider.articles.length + (shouldShowFooter ? 1 : 0);
-
     return RefreshIndicator(
       onRefresh: _refreshData,
-      child: ListView.separated(
+      child: ListView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: itemCount,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemCount: provider.articles.length + 1,
         itemBuilder: (context, index) {
-          final articles = provider.articles;
-
-          if (index < articles.length) {
-            final article = articles[index];
-            return ArticleWidget(article: article, key: ValueKey(article.id));
-          }
-          if (provider.hasMore) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          } else {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: Text(
-                  '🎉 You have reached the end!',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+          if (index < provider.articles.length) {
+            return Column(
+              children: [
+                ArticleWidget(
+                  article: provider.articles[index],
+                  key: ValueKey(provider.articles[index].id),
                 ),
-              ),
+                const Divider(height: 1),
+              ],
             );
           }
+          return _buildListFooter(provider);
         },
+      ),
+    );
+  }
+
+  Widget _buildListFooter(NewsProvider provider) {
+    if (provider.hasMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Text(
+          '🎉 You have reached the end!',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
       ),
     );
   }
